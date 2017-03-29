@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "lru-cache": "^4.0.2",
+    "redux": "^3.6.0"
+  },
+  "devDependencies": {
+    "budo": "^9.4.7"
+  },
+  "scripts": {
+    "start": "budo app.js --live"
+  }
+}
