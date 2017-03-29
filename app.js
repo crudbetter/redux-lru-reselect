@@ -2,10 +2,8 @@ const { createStore } = require('redux')
 const { createSelector } = require('reselect')
 const LRU = require('lru-cache')
 
-const millisInOneDay = 86400000
-
-const initialState = {
-  buffer: { cache: new LRU({ max: 300, length: () => 1 }) }
+function createLRU() {
+  return new LRU({ max: 300, length: () => 1 })
 }
 
 const UPDATE_BUFFER = 'UPDATE_BUFFER'
@@ -22,28 +20,30 @@ function updateBuffer(key) {
   }
 }
 
-function reducer(state = initialState, action) {
+const reducerCache = createLRU()
+function reducer(state = { buffer: {} }, action) {
   switch (action.type) {
     case UPDATE_BUFFER:
-      const { buffer: { cache } } = state
+      const { buffer } = state
 
-      cache.set(action.key, action.data)
+      reducerCache.load(buffer)
+      reducerCache.set(action.key, action.data)
       
-      return Object.assign({}, state, {
-        buffer: { cache: cache },
-      })
+      return Object.assign({}, state, { buffer: reducerCache.dump() })
     default:
       return state
   }
 }
 
+const selectorCache = createLRU()
 const bufferSelector = createSelector(
   [
     (state, _key) => state.buffer,
     (_state, key) => key
   ],
-  ({ cache }, key) => {
-    return cache.get(key)
+  (buffer, key) => {
+    selectorCache.load(buffer)
+    return selectorCache.get(key)
   }
 )
 
