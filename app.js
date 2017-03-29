@@ -43,7 +43,7 @@ const bufferSelector = createSelector(
     (_state, key) => key
   ],
   ({ cache }, key) => {
-    return buffer.get(key)
+    return cache.get(key)
   }
 )
 
