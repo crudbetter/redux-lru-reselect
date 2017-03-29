@@ -5,7 +5,7 @@ const LRU = require('lru-cache')
 const millisInOneDay = 86400000
 
 const initialState = {
-  buffer: new LRU({ max: 300, length: () => 1 })
+  buffer: { cache: new LRU({ max: 300, length: () => 1 }) }
 }
 
 const UPDATE_BUFFER = 'UPDATE_BUFFER'
@@ -25,11 +25,13 @@ function updateBuffer(key) {
 function reducer(state = initialState, action) {
   switch (action.type) {
     case UPDATE_BUFFER:
-      const { buffer } = state
+      const { buffer: { cache } } = state
 
-      buffer.set(action.key, action.data)
+      cache.set(action.key, action.data)
       
-      return Object.assign({}, state)
+      return Object.assign({}, state, {
+        buffer: { cache: cache },
+      })
     default:
       return state
   }
@@ -40,7 +42,7 @@ const bufferSelector = createSelector(
     (state, _key) => state.buffer,
     (_state, key) => key
   ],
-  (buffer, key) => {
+  ({ cache }, key) => {
     return buffer.get(key)
   }
 )
